@@ -1,11 +1,14 @@
 package warehouse.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
+
 import warehouse.model.Good;
 import warehouse.repository.GoodRepository;
 
 import java.util.List;
 
+@Tag(name = "Goods", description = "Endpoints for managing goods in the warehouse")
 @RestController
 public class GoodController {
     private final GoodRepository repository;
