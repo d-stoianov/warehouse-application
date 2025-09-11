@@ -1,8 +1,6 @@
 package warehouse.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
@@ -14,6 +12,10 @@ public class Good {
     private double price;
     private int quantity;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     public Good() {
     }
 
@@ -21,17 +23,23 @@ public class Good {
         this.name = name;
     }
 
-    public Good(String name, double price) {
+    public Good(String name, Category category) {
         this.name = name;
+        this.category = category;
+    }
+
+    public Good(String name, Category category, double price) {
+        this.name = name;
+        this.category = category;
         this.price = price;
     }
 
-    public Good(String name, double price, int quantity) {
+    public Good(String name, Category category, double price, int quantity) {
         this.name = name;
+        this.category = category;
         this.price = price;
         this.quantity = quantity;
     }
-
 
     public Long getId() {
         return id;
@@ -47,6 +55,10 @@ public class Good {
 
     public int getQuantity() {
         return quantity;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     public void setId(Long id) {
@@ -65,15 +77,23 @@ public class Good {
         this.quantity = quantity;
     }
 
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Good good)) return false;
-        return Double.compare(price, good.price) == 0 && quantity == good.quantity && Objects.equals(id, good.id) && Objects.equals(name, good.name);
+        return Double.compare(price, good.price) == 0 &&
+                quantity == good.quantity &&
+                Objects.equals(id, good.id) &&
+                Objects.equals(name, good.name) &&
+                Objects.equals(category, good.category);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, price, quantity);
+        return Objects.hash(id, name, price, quantity, category);
     }
 
     @Override
