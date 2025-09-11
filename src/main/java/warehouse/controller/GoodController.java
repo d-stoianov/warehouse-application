@@ -2,52 +2,73 @@ package warehouse.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
-
+import warehouse.dto.GoodDto;
 import warehouse.model.Good;
+import warehouse.model.Category;
 import warehouse.repository.GoodRepository;
+import warehouse.repository.CategoryRepository;
 
 import java.util.List;
 
 @Tag(name = "Goods", description = "Endpoints for managing goods in the warehouse")
 @RestController
+@RequestMapping("/goods")
 public class GoodController {
-    private final GoodRepository repository;
+    private final GoodRepository goodRepository;
+    private final CategoryRepository categoryRepository;
 
-    public GoodController(GoodRepository repository) {
-        this.repository = repository;
+    public GoodController(GoodRepository goodRepository, CategoryRepository categoryRepository) {
+        this.goodRepository = goodRepository;
+        this.categoryRepository = categoryRepository;
     }
 
-    @GetMapping("/goods")
-    List<Good> all() {
-        return repository.findAll();
+    @GetMapping
+    public List<Good> all() {
+        return goodRepository.findAll();
     }
 
-    @PostMapping("/goods")
-    Good newGood(@RequestBody Good newGood) {
-        return repository.save(newGood);
+    @PostMapping
+    public Good newGood(@RequestBody GoodDto goodDto) {
+        Good good = new Good();
+        good.setName(goodDto.getName());
+        good.setPrice(goodDto.getPrice());
+        good.setQuantity(goodDto.getQuantity());
+        
+        if (goodDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(goodDto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+
+            good.setCategory(category);
+        }
+
+        return goodRepository.save(good);
     }
 
-    @GetMapping("/goods/{id}")
-    Good one(@PathVariable Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Good not found"));
+    @GetMapping("/{id}")
+    public Good one(@PathVariable Long id) {
+        return goodRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Good not found"));
     }
 
-    // TODO: fix this to update each field separately and not reset not specified fields to default values like null or 0
-    @PutMapping("/goods/{id}")
-    Good replaceGood(@PathVariable Long id, @RequestBody Good newGood) {
-        return repository.findById(id).map(good -> {
-            good.setName(newGood.getName());
-            good.setPrice(newGood.getPrice());
-            good.setQuantity(newGood.getQuantity());
+    @PutMapping("/{id}")
+    public Good replaceGood(@PathVariable Long id, @RequestBody GoodDto goodDto) {
+        return goodRepository.findById(id).map(good -> {
+            if (goodDto.getName() != null) good.setName(goodDto.getName());
+            if (goodDto.getPrice() != 0) good.setPrice(goodDto.getPrice());
+            if (goodDto.getQuantity() != 0) good.setQuantity(goodDto.getQuantity());
 
-            return repository.save(good);
-        }).orElseGet(() -> { // create new one if not found
-            return repository.save(newGood);
-        });
+            if (goodDto.getCategoryId() != null) {
+                Category category = categoryRepository.findById(goodDto.getCategoryId())
+                        .orElseThrow(() -> new RuntimeException("Category not found"));
+                good.setCategory(category);
+            }
+
+            return goodRepository.save(good);
+        }).orElseThrow(() -> new RuntimeException("Good not found"));
     }
 
-    @DeleteMapping("/goods/{id}")
-    void deleteOne(@PathVariable Long id) {
-        repository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteOne(@PathVariable Long id) {
+        goodRepository.deleteById(id);
     }
 }
