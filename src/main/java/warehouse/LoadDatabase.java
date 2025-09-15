@@ -34,10 +34,11 @@ public class LoadDatabase {
             Category schoolGoodsCat = new Category("School Goods");
             categoryRepository.save(schoolGoodsCat);
 
+            // goods
             log.info("Preloading {}", goodRepository.save(new Good("Good with no category")));
-            log.info("Preloading {}", goodRepository.save(new Good("Backpack", schoolGoodsCat)));
-            log.info("Preloading {}", goodRepository.save(new Good("Expensive pencil", schoolGoodsCat, 35.5)));
-            log.info("Preloading {}", goodRepository.save(new Good("Super expensive notebook", schoolGoodsCat, 150.35, 10)));
+            log.info("Preloading {}", goodRepository.save(new Good("Backpack").setCategory(schoolGoodsCat)));
+            log.info("Preloading {}", goodRepository.save(new Good("Expensive pencil", 35.5).setCategory(schoolGoodsCat)));
+            log.info("Preloading {}", goodRepository.save(new Good("Super expensive notebook", 150.35, 10).setCategory(schoolGoodsCat).setSupplier(dimaSupplier)));
         };
     }
 }

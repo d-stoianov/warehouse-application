@@ -16,6 +16,10 @@ public class Good {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
     public Good() {
     }
 
@@ -23,20 +27,13 @@ public class Good {
         this.name = name;
     }
 
-    public Good(String name, Category category) {
+    public Good(String name, double price) {
         this.name = name;
-        this.category = category;
-    }
-
-    public Good(String name, Category category, double price) {
-        this.name = name;
-        this.category = category;
         this.price = price;
     }
 
-    public Good(String name, Category category, double price, int quantity) {
+    public Good(String name, double price, int quantity) {
         this.name = name;
-        this.category = category;
         this.price = price;
         this.quantity = quantity;
     }
@@ -61,6 +58,10 @@ public class Good {
         return category;
     }
 
+    public Supplier getSupplier() {
+        return supplier;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -77,23 +78,14 @@ public class Good {
         this.quantity = quantity;
     }
 
-    public void setCategory(Category category) {
+    public Good setCategory(Category category) {
         this.category = category;
+        return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Good good)) return false;
-        return Double.compare(price, good.price) == 0 &&
-                quantity == good.quantity &&
-                Objects.equals(id, good.id) &&
-                Objects.equals(name, good.name) &&
-                Objects.equals(category, good.category);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, price, quantity, category);
+    public Good setSupplier(Supplier supplier) {
+        this.supplier = supplier;
+        return this;
     }
 
     @Override
@@ -103,6 +95,8 @@ public class Good {
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", quantity=" + quantity +
+                ", category=" + category +
+                ", supplier=" + supplier +
                 '}';
     }
 }
