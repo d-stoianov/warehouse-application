@@ -1,12 +1,16 @@
 package warehouse.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import warehouse.dto.GoodDto;
 import warehouse.model.Good;
 import warehouse.model.Category;
+import warehouse.model.Supplier;
 import warehouse.repository.GoodRepository;
 import warehouse.repository.CategoryRepository;
+import warehouse.repository.SupplierRepository;
 
 import java.util.List;
 
@@ -16,10 +20,12 @@ import java.util.List;
 public class GoodController {
     private final GoodRepository goodRepository;
     private final CategoryRepository categoryRepository;
+    private final SupplierRepository supplierRepository;
 
-    public GoodController(GoodRepository goodRepository, CategoryRepository categoryRepository) {
+    public GoodController(GoodRepository goodRepository, CategoryRepository categoryRepository, SupplierRepository supplierRepository) {
         this.goodRepository = goodRepository;
         this.categoryRepository = categoryRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     @GetMapping
@@ -33,12 +39,19 @@ public class GoodController {
         good.setName(goodDto.getName());
         good.setPrice(goodDto.getPrice());
         good.setQuantity(goodDto.getQuantity());
-        
+
         if (goodDto.getCategoryId() != null) {
             Category category = categoryRepository.findById(goodDto.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
             good.setCategory(category);
+        }
+
+        if (goodDto.getSupplierId() != null) {
+            Supplier supplier = supplierRepository.findById(goodDto.getSupplierId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
+
+            good.setSupplier(supplier);
         }
 
         return goodRepository.save(good);
@@ -47,24 +60,34 @@ public class GoodController {
     @GetMapping("/{id}")
     public Good one(@PathVariable Long id) {
         return goodRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Good not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Good not found"));
     }
 
     @PutMapping("/{id}")
     public Good replaceGood(@PathVariable Long id, @RequestBody GoodDto goodDto) {
         return goodRepository.findById(id).map(good -> {
-            if (goodDto.getName() != null) good.setName(goodDto.getName());
-            if (goodDto.getPrice() != 0) good.setPrice(goodDto.getPrice());
-            if (goodDto.getQuantity() != 0) good.setQuantity(goodDto.getQuantity());
+            good.setName(goodDto.getName());
+            good.setPrice(goodDto.getPrice());
+            good.setQuantity(goodDto.getQuantity());
 
             if (goodDto.getCategoryId() != null) {
                 Category category = categoryRepository.findById(goodDto.getCategoryId())
-                        .orElseThrow(() -> new RuntimeException("Category not found"));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
                 good.setCategory(category);
+            } else {
+                good.setCategory(null);
+            }
+
+            if (goodDto.getSupplierId() != null) {
+                Supplier supplier = supplierRepository.findById(goodDto.getSupplierId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
+                good.setSupplier(supplier);
+            } else {
+                good.setSupplier(null);
             }
 
             return goodRepository.save(good);
-        }).orElseThrow(() -> new RuntimeException("Good not found"));
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Good not found"));
     }
 
     @DeleteMapping("/{id}")

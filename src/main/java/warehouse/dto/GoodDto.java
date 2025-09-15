@@ -5,6 +5,7 @@ public class GoodDto {
     private double price;
     private int quantity;
     private Long categoryId;
+    private Long supplierId;
 
     public GoodDto() {
     }
@@ -39,6 +40,14 @@ public class GoodDto {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Long getSupplierId() {
+        return supplierId;
+    }
+
+    public void setSupplierId(Long supplierId) {
+        this.supplierId = supplierId;
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import warehouse.dto.SupplierDto;
 import warehouse.model.Supplier;
+import warehouse.repository.GoodRepository;
 import warehouse.repository.SupplierRepository;
 
 import java.util.List;
@@ -14,49 +15,53 @@ import java.util.List;
 @RestController
 @RequestMapping("/suppliers")
 public class SupplierController {
-    private final SupplierRepository repository;
+    private final SupplierRepository supplierRepository;
+    private final GoodRepository goodRepository;
 
-    public SupplierController(SupplierRepository repository) {
-        this.repository = repository;
+    public SupplierController(SupplierRepository supplierRepository, GoodRepository goodRepository) {
+        this.supplierRepository = supplierRepository;
+        this.goodRepository = goodRepository;
     }
 
     @GetMapping("")
     List<Supplier> all() {
-        return repository.findAll();
+        return supplierRepository.findAll();
     }
 
     @PostMapping("")
     Supplier newSupplier(@RequestBody SupplierDto newSupplier) {
         Supplier supplier = new Supplier(newSupplier.getContactInfo(), newSupplier.getAddress());
-        return repository.save(supplier);
+        return supplierRepository.save(supplier);
     }
 
     @GetMapping("/{id}")
     public Supplier one(@PathVariable Long id) {
-        return repository.findById(id)
+        return supplierRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
     }
 
     @PutMapping("/{id}")
     public Supplier replaceSupplier(@PathVariable Long id, @RequestBody SupplierDto newSupplier) {
-        return repository.findById(id).map(supplier -> {
-            if (newSupplier.getContactInfo() != null) {
-                supplier.setContactInfo(newSupplier.getContactInfo());
-            }
-            if (newSupplier.getAddress() != null) {
-                supplier.setAddress(newSupplier.getAddress());
-            }
-            return repository.save(supplier);
-        }).orElseGet(() -> {
-            Supplier supplier = new Supplier();
+        return supplierRepository.findById(id).map(supplier -> {
             supplier.setContactInfo(newSupplier.getContactInfo());
             supplier.setAddress(newSupplier.getAddress());
-            return repository.save(supplier);
-        });
+
+            return supplierRepository.save(supplier);
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
     }
 
     @DeleteMapping("/{id}")
     public void deleteOne(@PathVariable Long id) {
-        repository.deleteById(id);
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Supplier not found"));
+
+        // unlink supplier from goods
+        goodRepository.findAllBySupplier(supplier).forEach(good -> {
+            good.setSupplier(null);
+            goodRepository.save(good);
+        });
+
+        // delete the category
+        supplierRepository.delete(supplier);
     }
 }
