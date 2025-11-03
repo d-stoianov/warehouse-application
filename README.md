@@ -23,12 +23,12 @@ on Good, Category, Supplier entities.
    mvn package
    ```
 
-4. Start the development server:
+3. Start the development server:
 
    ```
    mvn spring-boot:run
    ```
 
-5. Navigate to API's docs on `http://localhost:8080/docs`
+4. Navigate to API's docs on `http://localhost:8080/docs`
 
 App uses H2 for in-memory database, you can access the console by going to `http://localhost:8080/h2-console`
