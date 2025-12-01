@@ -1,7 +1,8 @@
 # Warehouse Application
 
-This project is a small Java Spring REST API. The service features basic functionality of REST API with CRUD operations
-on Good, Category, Supplier entities.
+This project is a small Java Spring REST API. The service features the basic functionality of REST API with CRUD
+operations on Good, Category, Supplier entities. To access resources like Good, Supplier, etc. - you have to create a
+user through /register endpoint and log in with /login using the same credentials from /register.
 
 ## Requirements
 
